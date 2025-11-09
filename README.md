@@ -1,10 +1,10 @@
-<h1 align="center">🧠 Vector Database Benchmarking: A Survey and Experimental Study</h1>
+<h1 align="center">Vector Database Benchmarking: A Survey and Experimental Study</h1>
 
 <p align="center">
   <strong>Author:</strong> Eric Traccitto<br>
   Master’s Student, Information Technology<br>
   York University, Canada 🇨🇦<br>
-  📧 <em>erictrac@my.yorku.ca</em>
+  <em>erictrac@my.yorku.ca</em>
 </p>
 
 ---
@@ -123,7 +123,8 @@ pip freeze > requirements.txt
 
 Usage
 First use the docker config files in order to recreate the containers which create the database management system:
-- 
+- docker-compose.yml
+- docker-compose-extended.yml
 
 Run the benchmarking notebooks sequentially to reproduce results:
 
@@ -152,3 +153,4 @@ Compare cloud-hosted systems (e.g., Pinecone, ChromaDB)
 🤖 Explore integration with ChatGPT’s retrieval-augmented generation (RAG) workflows
 
 <p align="center"> <sub>© 2025 Eric Traccitto — York University<br> Licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>.</sub> </p> ```
+
