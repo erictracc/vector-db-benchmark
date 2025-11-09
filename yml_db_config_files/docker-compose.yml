@@ -1,0 +1,163 @@
+version: '3.8'
+
+services:
+  ### POSTGRESQL with pgvector ###
+  postgres-vector-db:
+    image: ankane/pgvector
+    container_name: postgres-vector-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: vectordb
+    ports:
+      - "5432:5432" # Standard PostgreSQL port
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vector-net
+
+  ### Admin UI for PostgreSQL ###
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pg-admin-ui
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "8080:80" # Web UI will be at http://localhost:8080
+    depends_on:
+      - postgres-vector-db
+    networks:
+      - vector-net
+
+  ### MONGODB ###
+  mongo-vector-db:
+    image: mongo:7.0
+    container_name: mongo-vector-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+    ports:
+      - "27017:27017" # Standard MongoDB port
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - vector-net
+
+  ### Admin UI for MongoDB ###
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express-ui
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: adminpassword
+      ME_CONFIG_MONGODB_URL: mongodb://admin:adminpassword@mongo-vector-db:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: dashboardpassword
+    ports:
+      - "8081:8081" # Web UI will be at http://localhost:8081
+    depends_on:
+      - mongo-vector-db
+    networks:
+      - vector-net
+
+  ### QDRANT Vector Database ###
+  qdrant-vector-db:
+    image: qdrant/qdrant:v1.11.0
+    container_name: qdrant-vector-db
+    restart: unless-stopped
+    ports:
+      - "6333:6333"   # REST API + Web Dashboard
+      - "6334:6334"   # gRPC (optional)
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - vector-net
+
+  qdrant-console:
+    image: qdrant/qdrant-console:latest
+    container_name: qdrant-console
+    environment:
+      QDRANT_URL: http://192.168.195.69:6333
+    ports:
+      - "8082:80"          # open http://localhost:8082
+    depends_on:
+      - qdrant-vector-db
+    networks:
+      - vector-net
+
+    ### MILVUS Vector Database ###
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: milvus-etcd
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+    volumes:
+      - milvus_etcd_data:/etcd
+    networks:
+      - vector-net
+
+  minio:
+    image: minio/minio:RELEASE.2023-09-30T07-02-29Z
+    container_name: milvus-minio
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    command: server /data
+    ports:
+      - "9100:9000"  # remapped to avoid conflict with Portainer
+    volumes:
+      - milvus_minio_data:/data
+    networks:
+      - vector-net
+
+  milvus:
+    image: milvusdb/milvus:v2.4.0
+    container_name: milvus-vector-db
+    depends_on:
+      - etcd
+      - minio
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    ports:
+      - "19530:19530"  # gRPC API
+      - "9092:9091"    # REST API (remapped)
+    volumes:
+      - milvus_data:/var/lib/milvus
+    networks:
+      - vector-net
+
+  ### WEAVIATE Vector Database ###
+  weaviate:
+    image: semitechnologies/weaviate:1.24.6
+    container_name: weaviate-vector-db
+    restart: unless-stopped
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: ./data
+      DEFAULT_VECTORIZER_MODULE: none
+      CLUSTER_HOSTNAME: weaviate
+    ports:
+      - "8084:8080"  # REST & GraphQL endpoint (unique)
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    networks:
+      - vector-net
+
+
+volumes:
+  postgres_data:
+  mongo_data:
+  qdrant_data:
+  milvus_data:
+  milvus_etcd_data:
+  milvus_minio_data:
+  weaviate_data:
+
+networks:
+  vector-net:
+
