@@ -54,7 +54,7 @@ The dataset consists of **AI-related articles** web-scraped from the **MIT AI Ne
 ---
 
 ## Repository Structure
-
+```
 ├── .venv/ # Virtual environment
 ├── data/ # Local data and results
 ├── models/ # Model storage (if applicable)
@@ -73,7 +73,7 @@ The dataset consists of **AI-related articles** web-scraped from the **MIT AI Ne
 ├── vectordb_connection.ipynb # General connection utilities
 ├── README.md
 └── requirements.txt
-
+```
 ---
 
 ## Methodology
@@ -150,7 +150,8 @@ Integrate distributed environments (e.g., Milvus cluster mode)
 
 Compare cloud-hosted systems (e.g., Pinecone, ChromaDB)
 
-🤖 Explore integration with ChatGPT’s retrieval-augmented generation (RAG) workflows
+Explore integration with ChatGPT’s retrieval-augmented generation (RAG) workflows
 
-<p align="center"> <sub>© 2025 Eric Traccitto — York University<br> Licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>.</sub> </p> ```
+<p align="center"> <sub>© 2025 Eric Traccitto — York University<br> Licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>.</sub> </p>
+
 
